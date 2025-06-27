@@ -56,7 +56,7 @@ const Dashboard = () => {
           return;
         }
   
-        const response = await fetch('http://localhost:8000/api/dashboard', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/dashboard`, {
           headers: {
             'Authorization': `Bearer ${googleToken}`,
             'Content-Type': 'application/json',
@@ -98,7 +98,7 @@ const Dashboard = () => {
     const fetchShipments = async () => {
       try {
         const googleToken = localStorage.getItem('google_token');
-        const response = await fetch('http://localhost:8000/api/getShipments', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getShipments`, {
           headers: {
             'Authorization': `Bearer ${googleToken}`,
           },
@@ -135,7 +135,7 @@ const Dashboard = () => {
     try {
       const googleToken = localStorage.getItem('google_token');
       const id = selectedShipment._id;
-      const response = await fetch(`http://localhost:8000/api/shipments/${id}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/shipments/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -51,7 +51,7 @@ const CreateShipment = () => {
     try {
       const google_token= localStorage.getItem('google_token');
       console.log(google_token)
-      const response = await fetch('http://localhost:8000/api/createShipments', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/createShipments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

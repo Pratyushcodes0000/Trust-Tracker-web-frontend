@@ -2,24 +2,24 @@ import React from 'react';
 import './Login.css';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
-const GOOGLE_CLIENT_ID = '908385555062-qhajjb6pk2o8jkpc9a8mdumt52rd582b.apps.googleusercontent.com'; // Replace with your client ID
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // From .env
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // From .env
 
 const Login = () => {
   const handleSuccess = (credentialResponse) => {
     console.log('Google credential:', credentialResponse.credential);
     const token = credentialResponse.credential;
     localStorage.setItem('google_token',token);
-    // St ore token in localStorage
-    fetch('http://localhost:8000/api/login', {
+    // Store token in localStorage
+    fetch(`${API_BASE_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ idToken: token }),
     })
-      
       .then(data => {
         console.log('Login success:', data);
         if (data.token) {
-          
+          // handle token if needed
         }
       })
       .catch(err => {
