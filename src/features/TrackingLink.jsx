@@ -6,6 +6,7 @@ const TrackingLink = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [trackingId, setTrackingId] = useState('');
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Get tracking ID from URL parameters or path
   useEffect(() => {
@@ -50,19 +51,27 @@ const TrackingLink = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    if (trackingId) {
+      setIsRefreshing(true);
+      await fetchTrackingData(trackingId);
+      setIsRefreshing(false);
+    }
+  };
+
   const getStatusColor = (status) => {
     const statusColors = {
-      'Created': '#3498db',
-      'Shipped': '#f39c12',
-      'Dispatched': '#9b59b6',
-      'In Transit': '#e67e22',
-      'Out for Delivery': '#e74c3c',
-      'Delivered': '#27ae60',
-      'Failed': '#e74c3c',
-      'Returned': '#95a5a6',
-      'Cancelled': '#7f8c8d'
+      'Created': '#3b82f6',
+      'Shipped': '#f59e0b',
+      'Dispatched': '#8b5cf6',
+      'In Transit': '#ea580c',
+      'Out for Delivery': '#dc2626',
+      'Delivered': '#059669',
+      'Failed': '#dc2626',
+      'Returned': '#6b7280',
+      'Cancelled': '#4b5563'
     };
-    return statusColors[status] || '#95a5a6';
+    return statusColors[status] || '#6b7280';
   };
 
   const getStatusIcon = (status) => {
@@ -105,6 +114,16 @@ const TrackingLink = () => {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const getEstimatedDelivery = () => {
+    if (!trackingData?.createdAt) return null;
+    
+    const createdDate = new Date(trackingData.createdAt);
+    const estimatedDate = new Date(createdDate);
+    estimatedDate.setDate(estimatedDate.getDate() + 7); // 7 days from creation
+    
+    return formatDate(estimatedDate);
   };
 
   if (loading) {
@@ -166,6 +185,13 @@ const TrackingLink = () => {
           <h2>Tracking Not Found</h2>
           <p>{error}</p>
           <p>Please check your tracking ID and try again.</p>
+          <button 
+            onClick={() => window.location.href = '/track'} 
+            className="track-button"
+            style={{ marginTop: '20px', maxWidth: '200px' }}
+          >
+            Try Again
+          </button>
         </div>
       </div>
     );
@@ -184,6 +210,7 @@ const TrackingLink = () => {
   }
 
   const progressPercentage = getProgressPercentage(trackingData.currentStatus);
+  const estimatedDelivery = getEstimatedDelivery();
 
   return (
     <div className="tracking-container">
@@ -195,6 +222,14 @@ const TrackingLink = () => {
         <div className="tracking-id">
           <span>Tracking ID: {trackingData.internalTrackingCode}</span>
         </div>
+        <button 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="refresh-button"
+          title="Refresh tracking data"
+        >
+          {isRefreshing ? '🔄' : '🔄'}
+        </button>
       </div>
 
       <div className="shipment-info">
@@ -202,21 +237,27 @@ const TrackingLink = () => {
           <h2>Shipment Details</h2>
           <div className="info-grid">
             <div className="info-item">
-              <label>Customer:</label>
+              <label>Customer</label>
               <span>{trackingData.customerName}</span>
             </div>
             <div className="info-item">
-              <label>Courier:</label>
+              <label>Courier</label>
               <span>{trackingData.courierName}</span>
             </div>
             <div className="info-item">
-              <label>Tracking Number:</label>
+              <label>Tracking Number</label>
               <span>{trackingData.trackingId}</span>
             </div>
             <div className="info-item">
-              <label>Order Date:</label>
+              <label>Order Date</label>
               <span>{formatDate(trackingData.createdAt)}</span>
             </div>
+            {estimatedDelivery && (
+              <div className="info-item">
+                <label>Estimated Delivery</label>
+                <span>{estimatedDelivery}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -278,6 +319,7 @@ const TrackingLink = () => {
           ) : (
             <div className="no-logs">
               <p>No tracking updates available yet.</p>
+              <p>Updates will appear here as your package moves through the delivery process.</p>
             </div>
           )}
         </div>
