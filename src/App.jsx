@@ -5,6 +5,7 @@ import './App.css';
 import CreateShipment from './features/CreateShipment';
 import Dashboard from './features/Dashboard';
 import Login from './Auth/Login';
+import TrackingLink from './features/TrackingLink';
 
 function PrivateRoute({ children }) {
   const token = localStorage.getItem('google_token');
@@ -26,8 +27,9 @@ function PublicRoute({ children }) {
 const App = () => {
   return (
     <Router>
-      <Header />
       <Routes>
+        <Route path="/track" element={<TrackingLink />} />
+        <Route path="/track/:trackingCode" element={<TrackingLink />} />
         <Route path="/login" element={
           <PublicRoute>
             <Login />
@@ -35,11 +37,13 @@ const App = () => {
         } />
         <Route path="/create-shipment" element={
           <PrivateRoute>
+            <Header />
             <CreateShipment />
           </PrivateRoute>
         } />
         <Route path="/" element={
           <PrivateRoute>
+            <Header />
             <Dashboard />
           </PrivateRoute>
         } />
