@@ -42,13 +42,16 @@ const CreateShipment = () => {
     setForm({
       ...form,
       courierSlug: value,
-      courierName: value === 'manual' ? '' : (selectedCourier ? selectedCourier.name : ''),
+      courierName: selectedCourier ? selectedCourier.name : 'Manual',
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSuccess(false);
+    
+    console.log('📤 Sending shipment data:', form);
+    
     try {
       const response = await authenticatedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/createShipments`, {
         method: 'POST',
@@ -56,8 +59,12 @@ const CreateShipment = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create shipment');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Failed to create shipment');
       }
+      
+      const result = await response.json();
+      console.log('✅ Shipment created successfully:', result);
       
       setSuccess(true);
       setForm({
