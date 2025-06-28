@@ -15,7 +15,7 @@ const Login = () => {
       localStorage.setItem('google_token', token);
       
       // Send token to backend for verification and user creation
-      const response = await fetch(`${API_BASE_URL}/login`, {
+      const response = await fetch(`${API_BASE_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ idToken: token }),
