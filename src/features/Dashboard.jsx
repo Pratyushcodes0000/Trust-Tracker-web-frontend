@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { authenticatedFetch } from '../utils/auth';
 
 ChartJS.register(
   CategoryScale,
@@ -97,12 +98,8 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchShipments = async () => {
       try {
-        const googleToken = localStorage.getItem('google_token');
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getShipments`, {
-          headers: {
-            'Authorization': `Bearer ${googleToken}`,
-          },
-        });
+        const response = await authenticatedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/getShipments`);
+        
         if (!response.ok) {
           throw new Error('Failed to fetch shipments');
         }
@@ -110,6 +107,10 @@ const Dashboard = () => {
         setShipments(data.shipments || []);
       } catch (error) {
         console.error('Error fetching shipments:', error);
+        if (error.message === 'Authentication failed') {
+          // User will be redirected to login automatically
+          return;
+        }
       }
     };
     fetchShipments();
@@ -133,25 +134,27 @@ const Dashboard = () => {
 
   const handleSaveStatus = async () => {
     try {
-      const googleToken = localStorage.getItem('google_token');
       const id = selectedShipment._id;
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/shipments/${id}/status`, {
+      const response = await authenticatedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/shipments/${id}/status`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${googleToken}`,
-        },
         body: JSON.stringify({ status: newStatus }),
       });
+      
       if (!response.ok) {
         throw new Error('Failed to update shipment status');
       }
+      
       setShipments(shipments.map(s =>
         s._id === selectedShipment._id ? { ...s, currentStatus: newStatus } : s
       ));
       closeModal();
     } catch (error) {
       console.error('Error updating shipment status:', error);
+      if (error.message === 'Authentication failed') {
+        // User will be redirected to login automatically
+        return;
+      }
+      alert('Error updating shipment status: ' + error.message);
     }
   };
 

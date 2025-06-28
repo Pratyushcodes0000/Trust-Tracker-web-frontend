@@ -6,25 +6,39 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID; // From .env
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL; // From .env
 
 const Login = () => {
-  const handleSuccess = (credentialResponse) => {
+  const handleSuccess = async (credentialResponse) => {
     console.log('Google credential:', credentialResponse.credential);
     const token = credentialResponse.credential;
-    localStorage.setItem('google_token',token);
-    // Store token in localStorage
-    fetch(`${API_BASE_URL}/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ idToken: token }),
-    })
-      .then(data => {
-        console.log('Login success:', data);
-        if (data.token) {
-          // handle token if needed
-        }
-      })
-      .catch(err => {
-        console.error('Login error:', err.message);
+    
+    try {
+      // Store token in localStorage
+      localStorage.setItem('google_token', token);
+      
+      // Send token to backend for verification and user creation
+      const response = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken: token }),
       });
+
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        console.log('Login success:', data);
+        // Store user info if needed
+        localStorage.setItem('user_info', JSON.stringify(data.user));
+        // Redirect to dashboard
+        window.location.href = '/';
+      } else {
+        console.error('Login failed:', data.message);
+        localStorage.removeItem('google_token');
+        alert('Login failed: ' + (data.message || 'Unknown error'));
+      }
+    } catch (err) {
+      console.error('Login error:', err.message);
+      localStorage.removeItem('google_token');
+      alert('Login error: ' + err.message);
+    }
   };
 
   const handleError = () => {
@@ -33,9 +47,7 @@ const Login = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('google_token');
-    localStorage.removeItem('jwt_token'); // ✅ clear backend token too
-    localStorage.removeItem('user_id');
-    localStorage.removeItem('user_name');
+    localStorage.removeItem('user_info');
     window.location.href = '/login';
   };
 

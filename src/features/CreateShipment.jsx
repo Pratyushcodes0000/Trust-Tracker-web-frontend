@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './createShipment.css';
+import { authenticatedFetch } from '../utils/auth';
 
 const couriers = [
    {name:'Manual', code:'manual'},
@@ -49,19 +50,15 @@ const CreateShipment = () => {
     e.preventDefault();
     setSuccess(false);
     try {
-      const google_token= localStorage.getItem('google_token');
-      console.log(google_token)
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/createShipments`, {
+      const response = await authenticatedFetch(`${import.meta.env.VITE_API_BASE_URL}/api/createShipments`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${google_token}`,
-        },
         body: JSON.stringify(form),
       });
+      
       if (!response.ok) {
         throw new Error('Failed to create shipment');
       }
+      
       setSuccess(true);
       setForm({
         customerName: '',
@@ -74,7 +71,12 @@ const CreateShipment = () => {
       setTimeout(() => setSuccess(false), 3000);
     } catch (error) {
       console.error('Error creating shipment:', error);
-      // Optionally show an error message to the user
+      if (error.message === 'Authentication failed') {
+        // User will be redirected to login automatically
+        return;
+      }
+      // Show error message to user
+      alert('Error creating shipment: ' + error.message);
     }
   };
 
