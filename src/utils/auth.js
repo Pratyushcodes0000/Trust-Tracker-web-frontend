@@ -21,7 +21,7 @@ export const isTokenExpired = (token) => {
 // Validate token with backend
 export const validateToken = async (token) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/validate-token`, {
+    const response = await fetch(`${API_BASE_URL}/api/validate-token`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

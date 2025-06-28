@@ -57,7 +57,7 @@ const Dashboard = () => {
           return;
         }
   
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/dashboard`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/dashboard`, {
           headers: {
             'Authorization': `Bearer ${googleToken}`,
             'Content-Type': 'application/json',
